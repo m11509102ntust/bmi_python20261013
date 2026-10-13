@@ -69,6 +69,7 @@
                 <span class="result-label">你的體位屬於 <strong>{{ result.label }}</strong></span>
                 <h2 id="result-title">給你的健康建議</h2>
                 <p>{{ result.advice }}</p>
+                <a class="result-reset" href="{{ url_for('index') }}">重新計算</a>
                 <span class="result-decoration" aria-hidden="true">✳</span>
               </section>
             {% else %}
