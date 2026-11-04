@@ -1,9 +1,9 @@
 import unittest
 
-from app import app, bmi_guidance
+from app import app
 
 
-class BmiAppTests(unittest.TestCase):
+class BmiRouteTests(unittest.TestCase):
     def setUp(self):
         self.client = app.test_client()
 
@@ -29,29 +29,27 @@ class BmiAppTests(unittest.TestCase):
         self.assertIn('aria-invalid="true"', page)
         self.assertNotIn("YOUR RESULT", page)
 
-    def test_taiwan_adult_thresholds(self):
-        for bmi, category in [
-            (18.4, "體重過輕"),
-            (18.5, "健康體位"),
-            (23.9, "健康體位"),
-            (24.0, "體重過重"),
-            (26.9, "體重過重"),
-            (27.0, "肥胖"),
-        ]:
-            with self.subTest(bmi=bmi):
-                self.assertEqual(bmi_guidance(bmi)["label"], category)
-
     def test_invalid_fields_do_not_produce_result(self):
-        for height, weight in [("", "65"), ("0", "65"), ("abc", "65"), ("170", "-2"), ("inf", "65"), ("170", "nan"), ("1e-300", "65"), ("1e308", "65"), ("1", "1e308")]:
+        for height, weight in [
+            ("", "65"),
+            ("0", "65"),
+            ("abc", "65"),
+            ("170", "-2"),
+            ("inf", "65"),
+            ("170", "nan"),
+            ("1e-300", "65"),
+            ("1e308", "65"),
+            ("1", "1e308"),
+        ]:
             with self.subTest(height=height, weight=weight):
-                response = self.client.post("/", data={"height": height, "weight": weight})
+                response = self.client.post("/", data={"name": "王小明", "height": height, "weight": weight})
                 page = response.get_data(as_text=True)
                 self.assertEqual(response.status_code, 200)
                 self.assertIn('aria-invalid="true"', page)
                 self.assertNotIn("YOUR RESULT", page)
 
     def test_input_is_escaped(self):
-        response = self.client.post("/", data={"height": '<script>alert(1)</script>', "weight": "65"})
+        response = self.client.post("/", data={"name": "王小明", "height": '<script>alert(1)</script>', "weight": "65"})
         page = response.get_data(as_text=True)
         self.assertNotIn("<script>", page)
         self.assertIn("請輸入大於 0", page)
